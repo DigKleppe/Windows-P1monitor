@@ -17,7 +17,8 @@ namespace P1monitor
         static SerialPort serialPort;
         static Parser parser = new Parser();
         Thread readThread;
-
+        static List<string> p1Data = new List<string>();
+        static bool newData = false;
         public MainForm()
         {
             InitializeComponent();
@@ -31,7 +32,6 @@ namespace P1monitor
                 poortToolStripMenuItem_Click(null, null);
             }
             toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
-
         }
 
         public bool OpenSerialPort(string port)
@@ -45,12 +45,13 @@ namespace P1monitor
                     serialPort.DataBits = 8;
                     serialPort.StopBits = StopBits.One;
                     serialPort.Handshake = Handshake.None;
-                    serialPort.ReadTimeout = 500;
-                    serialPort.WriteTimeout = 500;
+                    serialPort.ReadTimeout = 1500;
+                    serialPort.WriteTimeout = 1500;
                     serialPort.Open();
 
-                    readThread = new Thread(Read);
-                    readThread.Start();
+                   // readThread = new Thread(Read);
+                   // readThread.Start();
+                    textBox1.AppendText ("Comport open");
                     return true;
                 }
             }
@@ -65,10 +66,16 @@ namespace P1monitor
             {
                 try
                 {
-                    string message = serialPort.ReadLine();
+                   List<string> list = new List<string>();
+                   string message = serialPort.ReadLine();
                   //  Console.WriteLine(message);
-                     parser.parseP1data(message);
-
+                   list = parser.parseP1data(message);
+                   if (list != null)
+                   {
+                        p1Data = list;
+                        newData = true;
+                   } 
+                   
                 }
                 catch (TimeoutException) { }
             }
@@ -92,7 +99,40 @@ namespace P1monitor
             Properties.Settings.Default.FormLeft = Left;
             //       Properties.Settings.Default.recentFilesList = string.Join(";", toolStripMruList1.RecentFileList);
             Properties.Settings.Default.Save();
-            readThread.Join();
+        //    readThread.Join();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                List<string> list = new List<string>();
+                string message = serialPort.ReadLine();
+                //  Console.WriteLine(message);
+                list = parser.parseP1data(message);
+                if (list != null)
+                {
+                    p1Data = list;
+                    newData = true;
+                }
+
+            }
+            catch (TimeoutException) { }
+
+            if ( newData)
+            {
+               if (p1Data != null)
+                {
+                    foreach (string str in p1Data)
+                        textBox1.AppendText(str + "\r\n");
+                }
+                newData = false;
+            }
         }
     }
 }

@@ -20,7 +20,7 @@ namespace P1monitor
         private const int MAXDAYLOGVALUES = (24 * 60 * 60) / LOGINTERVAL;
         private const int MAXHOURLOGVALUES = 3600;
 
-        private List<log_t> hourLog;
+        public List<log_t> hourLog;
         private List<log_t> dayLog;
         private int timeStamp = 0;
         private int logPrescaler = LOGINTERVAL;
