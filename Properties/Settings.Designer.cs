@@ -73,7 +73,7 @@ namespace P1monitor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("\"com0\"")]
+        [global::System.Configuration.DefaultSettingValueAttribute("\"--\"")]
         public string Comport {
             get {
                 return ((string)(this["Comport"]));

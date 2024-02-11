@@ -55,6 +55,8 @@ namespace P1monitor
     public class Parser
     {
         public Log log = new Log();
+        private List<string> lines = new List<string>();
+        private int state = 0;
 
         p1Var[] p1Vars = {
             new p1Var( "1-0:21.7.0", "Actueel opgenomen vermogen L1",1),
@@ -73,7 +75,6 @@ namespace P1monitor
             new p1Var(  "0-0:96.7.21","Korte onderbrekingen",0),
             new p1Var(  "0-0:96.7.9", "Lange onderbrekingen",0 ),
             new p1Var(  "1-0:99.97.0","Onderbrekingslog",4 ),
-            new p1Var(  "", "",0 ) 
         };
 
         //    p1Vars p1VarTable = new p1Vars {
@@ -102,12 +103,13 @@ namespace P1monitor
         string[] parseValue ( String valuestr) // (000525.570*kWh)
         {
             string[] val =  valuestr.Split(new char[] { '*' });
-           // if ( val.Length ==2 )
-            {
-                val[0] = val[0].TrimStart('0'); // skip leading zeros
-                if (val[0].StartsWith("."))
-                    val[0] = "0" + val[0]; 
-            }       
+            val[0] = val[0].TrimStart('0'); // skip leading zeros from value 
+            if (val[0].StartsWith("."))
+                 val[0] = "0" + val[0];
+
+            if ( val.Length >1 )
+                val[1] = val[1].Trim( new char[] {')', '\r' }); // remove ") and \r" from unit
+           
             return val;  
         }
 
@@ -123,58 +125,93 @@ namespace P1monitor
             log_t logValue = new log_t();
             logValue.power = 0;
             logValue.deliveredPower = 0;
-            string[] lines = p1Buffer.Split(new char[] { '\n' });
+            
             List<string> p1OutBuffer;
             p1OutBuffer = new List<string>();
             string outLine;
             string[] valuestr;
 
-            foreach (p1Var pVar in p1Vars)
+            switch ( state) 
             {
-                foreach (string line in lines)
+                case 0:
+                if (p1Buffer.StartsWith("/"))  // first line of message 
                 {
-                    if (line.Contains(pVar.p1ID))
+                    lines.Clear();
+                        state = 1;
+                }
+                break;
+
+                case 1: 
+                    if ( p1Buffer.Contains( "!")) 
+                    { // last block with CRC received
+                      //                uint16_t crc = calculateCRC_CCITT((uint8_t*)p1Buffer, nrCharsInBuffer - 6);
+                      //                //			printf("  CRC: %x ", crc);
+                      //                unsigned int receivedeCRC;
+                      //                sscanf(&p1Buffer[nrCharsInBuffer - 6], "%x", &receivedeCRC);
+                      //                if (crc == receivedeCRC)
+                      //                {
+                        state = 2;
+                    }
+                    
+                    break;
+            }
+            lines.Add(p1Buffer);
+
+            if (state == 2) {
+                foreach (p1Var pVar in p1Vars)
+                {
+                    foreach (string line in lines)
                     {
-                        outLine = pVar.name + ";"; 
-                        
-                        string[] items = line.Split(new char[] { '(' });
-                        valuestr = parseValue(items[0]);
-
-                        switch ( pVar.function)
+                        if (line.Contains(pVar.p1ID))
                         {
-                            case 0:
-                                //  1 - 0:32.32.0(00008)	// Number of voltage sags in phase L1
-                                outLine = outLine + valuestr[0];
-                                break;
+                            string[] items = line.Split(new char[] { '(' });
+                            if (items.Length > 1)
+                            {
+                                outLine = pVar.name + ";";
+                                valuestr = parseValue(items[1]);
+                                switch (pVar.function)
+                                {
+                                    case 0:
+                                        //  1 - 0:32.32.0(00008)	// Number of voltage sags in phase L1
+                                        outLine = outLine + valuestr[0];
+                                        break;
 
-                            case 1: // Power used, set from kW to W 1-0:1.7.0(00.079*kW)      // actual power deleverd to client Tariff 1
-                                f = float.Parse(valuestr[0])  * 1000;
-                                logValue.power += f; // add power of 3 phases ( if present)
-                                outLine = outLine + f.ToString() + " W";
+                                    case 1: // Power used, set from kW to W 1-0:1.7.0(00.079*kW)      // actual power deleverd to client Tariff 1
+                                        f = float.Parse(valuestr[0]) * 1000;
+                                        logValue.power += f; // add power of 3 phases ( if present)
+                                        outLine = outLine + f.ToString() + " W";
+
+                                        break;
+
+                                    case 2: // Power delivered, set from kW to W
+                                        f = float.Parse(valuestr[0]) * 1000;
+                                        logValue.deliveredPower += f; // add power of 3 phases ( if present)
+                                        outLine = outLine + f.ToString() + " W";
+                                        break;
+
+                                    case 3:  // 1-0:32.7.0(227.5*V)	// Instantaneous voltage L1 in V resolution voltage
+                                        outLine = outLine + valuestr[0] + " V";
+                                        break;
+
+                                    case 4:   // power failures log eg 1-0:99.97.0(2)(0-0:96.7.19)(210827121443S)(0000010761*s)(210827131420S)(0000000326*s)
+                                        break;
+
+                                }
                                 
-                                break;
-
-                            case 2: // Power delivered, set from kW to W
-                                f = float.Parse(valuestr[0]) * 1000;
-                                logValue.deliveredPower += f; // add power of 3 phases ( if present)
-                                outLine = outLine + f.ToString() + " W";
-                                 break;
-
-                            case 3:  // 1-0:32.7.0(227.5*V)	// Instantaneous voltage L1 in V resolution voltage
-                                p1OutBuffer.Add(valuestr[0] + " V" );
-                                outLine = outLine + valuestr[0] + " V" ; 
-                                break;
-
-                            case 4:   // power failures log eg 1-0:99.97.0(2)(0-0:96.7.19)(210827121443S)(0000010761*s)(210827131420S)(0000000326*s)
-                                break;
-
+                                  
+                                
+                                p1OutBuffer.Add(outLine);
+                            }
                         }
-                        p1OutBuffer.Add(outLine);
                     }
                 }
+                log.addToLog(logValue);
+                state = 0;
+               
+                return p1OutBuffer;
             }
-            log.addToLog(logValue);
-            return p1OutBuffer;
+            else
+                return null;
         }
     }
 }

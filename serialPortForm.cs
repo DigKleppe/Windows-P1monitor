@@ -25,7 +25,7 @@ namespace P1monitor
         public void setPort(string portName)
         {
             bool found = false;
-            InterfaceForm_Shown(this, null);
+            SerialPortForm_Shown(this, null);
             foreach (RadioButton button in portRadioButtonList)
             {
                 if (button.Text == portName)
@@ -49,12 +49,17 @@ namespace P1monitor
             return "no comport";
         }
 
-        private void InterfaceForm_Shown(object sender, EventArgs e)
+        private void OkButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void SerialPortForm_Shown(object sender, EventArgs e)
         {
             int item = 0;
             string[] ports = SerialPort.GetPortNames();
             if (ports.Length == 0)
-                statusStrip1. = "Geen serieele poort gevonden!";
+                toolStripStatusLabel1.Text = "Geen serieele poort gevonden!";
             else
             {
                 foreach (string name in ports)
@@ -64,15 +69,10 @@ namespace P1monitor
                     portRadioButtonList[item].Text = name;
                     portRadioButtonList[item].Parent = portGB;
                     portRadioButtonList[item].Left = 10;
-                    portRadioButtonList[item].Top = 12 + (item * 20); // portRadioButtonList[item].Heigth);
+                    portRadioButtonList[item].Top = 20 + (item * 30); // portRadioButtonList[item].Heigth);
                     item++;
                 }
             }
-        }
-
-        private void OkButton_Click(object sender, EventArgs e)
-        {
-            Close();
         }
     }
 }

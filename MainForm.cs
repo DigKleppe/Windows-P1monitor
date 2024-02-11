@@ -12,12 +12,13 @@ using System.Windows.Forms;
 
 namespace P1monitor
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         static SerialPort serialPort;
         static Parser parser = new Parser();
+        Thread readThread;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             Height = Properties.Settings.Default.FormHeight;
@@ -25,12 +26,14 @@ namespace P1monitor
             Top = Properties.Settings.Default.FormTop;
             Left = Properties.Settings.Default.FormLeft;
             Parser parser = new Parser();
-            if ( OpenSerialPort (Properties.Settings.Default.Comport) == false )
+            if (OpenSerialPort(Properties.Settings.Default.Comport) == false)
             {
-                SerialPortForm serialPortForm = new SerialPortForm(Properties.Settings.Default.Comport);
+                poortToolStripMenuItem_Click(null, null);
             }
+            toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
+
         }
-              
+
         public bool OpenSerialPort(string port)
         {
             try {
@@ -46,7 +49,8 @@ namespace P1monitor
                     serialPort.WriteTimeout = 500;
                     serialPort.Open();
 
-                    Thread readThread = new Thread(Read);
+                    readThread = new Thread(Read);
+                    readThread.Start();
                     return true;
                 }
             }
@@ -62,8 +66,8 @@ namespace P1monitor
                 try
                 {
                     string message = serialPort.ReadLine();
-                    Console.WriteLine(message);
-                    parser.parseP1data(message);
+                  //  Console.WriteLine(message);
+                     parser.parseP1data(message);
 
                 }
                 catch (TimeoutException) { }
@@ -75,9 +79,20 @@ namespace P1monitor
             SerialPortForm f = new SerialPortForm(Properties.Settings.Default.Comport);
             if (f.ShowDialog() == DialogResult.OK)
             {
-                    Properties.Settings.Default.Comport = f.getPort();
+                Properties.Settings.Default.Comport = f.getPort();
             }
             f.Dispose();
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.FormHeight = Height;
+            Properties.Settings.Default.FormWidth = Width;
+            Properties.Settings.Default.FormTop = Top;
+            Properties.Settings.Default.FormLeft = Left;
+            //       Properties.Settings.Default.recentFilesList = string.Join(";", toolStripMruList1.RecentFileList);
+            Properties.Settings.Default.Save();
+            readThread.Join();
         }
     }
 }
