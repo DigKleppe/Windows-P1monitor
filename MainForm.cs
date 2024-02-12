@@ -22,6 +22,11 @@ namespace P1monitor
         static List<string> p1Data = new List<string>();
         static bool newData = false;
         static List<TableItem> tableItems = new List<TableItem>();   
+        ChartControl chartControl = new ChartControl();
+        TabPage tabPageChart = new TabPage();
+
+       
+       
 
         // create a series for each line
         Series series1 = new Series("Group A");
@@ -71,6 +76,11 @@ namespace P1monitor
             }
             toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
             buildChart();
+
+            tabPage3.Controls.Add(chartControl);
+         //   tabControl1.Controls.Add(tabPageChart);
+            
+
         }
         private void plot ( int series , double value)
         {
