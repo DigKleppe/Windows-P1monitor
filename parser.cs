@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 /*
 0-0:1.0.0(231021110048S) // timestamp
@@ -56,6 +57,7 @@ namespace P1monitor
     {
         public Log log = new Log();
         private List<string> lines = new List<string>();
+        private log_t lastLogValue = new log_t();
         private int state = 0;
 
         p1Var[] p1Vars = {
@@ -68,13 +70,16 @@ namespace P1monitor
             new p1Var(  "1-0:32.7.0", "Spanning L1",3),
             new p1Var(  "1-0:52.7.0", "Spanning L2",3),
             new p1Var(  "1-0:72.7.0", "Spanning L3",3),
+            new p1Var(  "1-0:31.7.0", "Stroom L1",4),
+            new p1Var(  "1-0:51.7.0", "Stroom L2",5),
+            new p1Var(  "1-0:71.7.0", "Stroom L3",6),
             new p1Var(  "1-0:1.8.1",  "Opgenomen energie tarief 1",0 ),
             new p1Var(  "1-0:1.8.2",  "Opgenomen energie tarief 2",0 ),
             new p1Var(  "1-0:2.8.1",  "Geleverde energie tarief 1",0 ),
             new p1Var(  "1-0:2.8.2",  "Geleverde energie tarief 2",0 ),
             new p1Var(  "0-0:96.7.21","Korte onderbrekingen",0),
             new p1Var(  "0-0:96.7.9", "Lange onderbrekingen",0 ),
-            new p1Var(  "1-0:99.97.0","Onderbrekingslog",4 ),
+            new p1Var(  "1-0:99.97.0","Onderbrekingslog",10 ),
         };
 
         //    p1Vars p1VarTable = new p1Vars {
@@ -106,10 +111,14 @@ namespace P1monitor
             val[0] = val[0].TrimStart('0'); // skip leading zeros from value 
             if (val[0].StartsWith("."))
                  val[0] = "0" + val[0];
+            if (val[0].Length ==0 )
+                val[0] = "0";
+
+            val[0] = val[0].Trim(new char[] { ')', '\r' }); // remove ") and \r" if any
 
             if ( val.Length >1 )
                 val[1] = val[1].Trim( new char[] {')', '\r' }); // remove ") and \r" from unit
-           
+            
             return val;  
         }
 
@@ -118,6 +127,11 @@ namespace P1monitor
         //    return sprintf(dest, "%s=", src);
         //}
         //// reads p1Buffer, searches for IDs , if found add corresponding name and value to p1OutData;
+
+        public log_t getlastLogValue()
+        {
+            return lastLogValue;
+        }
 
         public List <string> parseP1data(string p1Buffer)
         {
@@ -177,23 +191,37 @@ namespace P1monitor
                                         break;
 
                                     case 1: // Power used, set from kW to W 1-0:1.7.0(00.079*kW)      // actual power deleverd to client Tariff 1
-                                        f = float.Parse(valuestr[0]) * 1000;
+                                        f = float.Parse(valuestr[0],System.Globalization.CultureInfo.InvariantCulture) * 1000;
                                         logValue.power += f; // add power of 3 phases ( if present)
                                         outLine = outLine + f.ToString() + " W";
 
                                         break;
 
                                     case 2: // Power delivered, set from kW to W
-                                        f = float.Parse(valuestr[0]) * 1000;
+                                        f = float.Parse(valuestr[0], System.Globalization.CultureInfo.InvariantCulture) * 1000;
                                         logValue.deliveredPower += f; // add power of 3 phases ( if present)
                                         outLine = outLine + f.ToString() + " W";
                                         break;
 
-                                    case 3:  // 1-0:32.7.0(227.5*V)	// Instantaneous voltage L1 in V resolution voltage
-                                        outLine = outLine + valuestr[0] + " V";
+                                    case 3:  // 1-0:32.7.0(227.5*V)	// Instantaneous voltage L1 in V resolution voltage or A
+                                        outLine = outLine + valuestr[0] + " " + valuestr[1];
                                         break;
 
-                                    case 4:   // power failures log eg 1-0:99.97.0(2)(0-0:96.7.19)(210827121443S)(0000010761*s)(210827131420S)(0000000326*s)
+                                    case 4:  // 1-0:32.7.0(227.5*V)	// Instantaneous voltage L1 in V resolution voltage or A
+                                        outLine = outLine + valuestr[0] + " " + valuestr[1];
+                                        logValue.currentL1 = float.Parse(valuestr[0]);
+                                        break;
+                                    case 5:  // 1-0:32.7.0(227.5*V)	// Instantaneous voltage L1 in V resolution voltage or A
+                                        outLine = outLine + valuestr[0] + " " + valuestr[1];
+                                        logValue.currentL2 = float.Parse(valuestr[0]);
+                                        break;
+                                    case 6:  // 1-0:32.7.0(227.5*V)	// Instantaneous voltage L1 in V resolution voltage or A
+                                        outLine = outLine + valuestr[0] + " " + valuestr[1];
+                                        logValue.currentL3 = float.Parse(valuestr[0]);
+                                        break;
+
+
+                                    case 10:   // power failures log eg 1-0:99.97.0(2)(0-0:96.7.19)(210827121443S)(0000010761*s)(210827131420S)(0000000326*s)
                                         break;
 
                                 }
@@ -206,6 +234,7 @@ namespace P1monitor
                     }
                 }
                 log.addToLog(logValue);
+                lastLogValue = logValue;
                 state = 0;
                
                 return p1OutBuffer;

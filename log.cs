@@ -11,7 +11,9 @@ namespace P1monitor
         public int timeStamp;
         public float power;
         public float deliveredPower;
-        public float voltage;
+        public float currentL1;
+        public float currentL2;
+        public float currentL3;
     }
     public class Log
     {
@@ -39,7 +41,9 @@ namespace P1monitor
             logValue.timeStamp = ++timeStamp;
             accumulator.power += logValue.power;
             accumulator.deliveredPower += logValue.deliveredPower;
-            accumulator.voltage += logValue.voltage;
+            accumulator.currentL1 += logValue.currentL1;
+            accumulator.currentL2 += logValue.currentL2;
+            accumulator.currentL3 += logValue.currentL3;
 
             if (--logPrescaler == 0)
             {
@@ -51,8 +55,14 @@ namespace P1monitor
                 logValue.deliveredPower = accumulator.deliveredPower / LOGINTERVAL; // average
                 accumulator.deliveredPower = 0;
 
-                logValue.voltage = accumulator.voltage / LOGINTERVAL;
-                accumulator.voltage = 0;
+                logValue.currentL1 = accumulator.currentL1 / LOGINTERVAL;
+                accumulator.currentL1 = 0;
+
+                logValue.currentL2 = accumulator.currentL2 / LOGINTERVAL;
+                accumulator.currentL2 = 0;
+
+                logValue.currentL3 = accumulator.currentL3 / LOGINTERVAL;
+                accumulator.currentL3 = 0;
 
                 if (dayLog.Count == MAXDAYLOGVALUES)
                     dayLog.RemoveAt(0);
