@@ -61,7 +61,7 @@ namespace P1monitor
         private int state = 0;
 
         p1Var[] p1Vars = {
-            new p1Var( "1-0:21.7.0", "Actueel opgenomen vermogen L1",1),
+            new p1Var(  "1-0:21.7.0", "Actueel opgenomen vermogen L1",1),
             new p1Var(  "1-0:41.7.0", "Actueel opgenomen vermogen L2",1),
             new p1Var(  "1-0:61.7.0", "Actueel opgenomen vermogen L3",1),
             new p1Var(  "1-0:22.7.0", "Actueel geleverd vermogen L1",2),

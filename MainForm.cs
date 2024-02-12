@@ -22,8 +22,8 @@ namespace P1monitor
         static List<string> p1Data = new List<string>();
         static bool newData = false;
         static List<TableItem> tableItems = new List<TableItem>();   
-        ChartControl chartControl = new ChartControl();
-        TabPage tabPageChart = new TabPage();
+        ChartControl chartControl1 = new ChartControl();
+       // TabPage tabPageChart = new TabPage();
 
        
        
@@ -77,7 +77,9 @@ namespace P1monitor
             toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
             buildChart();
 
-            tabPage3.Controls.Add(chartControl);
+         //   chartControl1.Parent = panel1;
+            tabPage3.Controls.Add(chartControl1);
+
          //   tabControl1.Controls.Add(tabPageChart);
             
 
@@ -189,6 +191,11 @@ namespace P1monitor
                
                 log_t lastLogValue = parser.getlastLogValue();
                 plot(0, lastLogValue.power);
+                chartControl1.plot(0, lastLogValue.power);
+                chartControl1.plot(1, lastLogValue.deliveredPower);
+                chartControl1.plot(2, lastLogValue.currentL1);
+                chartControl1.plot(3, lastLogValue.currentL2);
+                chartControl1.plot(4, lastLogValue.currentL3);
 
 
                 if (p1Data != null)
@@ -197,7 +204,6 @@ namespace P1monitor
                         textBox1.AppendText(str + "\r\n");
                 }
                 newData = false;
-
             }
         }
 
@@ -229,6 +235,12 @@ namespace P1monitor
         private void tablePanel1_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void MainForm_ResizeEnd(object sender, EventArgs e)
+        {
+           Size size = new Size(tabControl1.Width, tabControl1.Height);
+           chartControl1.resize(size);
         }
     }
 }
