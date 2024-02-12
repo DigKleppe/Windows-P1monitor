@@ -76,6 +76,7 @@ namespace P1monitor
             }
             toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
             buildChart();
+            MainForm_ResizeEnd(null, null); // resize chart
 
          //   chartControl1.Parent = panel1;
             tabPage3.Controls.Add(chartControl1);
@@ -85,11 +86,12 @@ namespace P1monitor
 
         }
         private void plot ( int series , double value)
-        {
+        {   DateTime dateTime = DateTime.Now;
+            
             switch (series)
             {
                 case 0:
-                    series1.Points.AddXY(x1Value++, value);
+                    series1.Points.AddXY(dateTime.ToShortTimeString(), value);
                     break;
                 case 1:
                     series2.Points.AddXY(x2Value++, value);

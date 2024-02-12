@@ -39,6 +39,7 @@ namespace P1monitor
         void init(ChartDescr[] chartDescrs)
         {
             int cbXpos = 0;
+            int index = 0;
             foreach (ChartDescr c in chartDescrs)
             {
                 CheckBox cb = new CheckBox();
@@ -47,9 +48,13 @@ namespace P1monitor
                 cb.Left = 10 + cbXpos;
                 cb.Width = cbWidth; 
                 cbXpos += cbWidth+10;
+                cb.Tag = index++;
+                cb.CheckedChanged += new System.EventHandler(this.cb_CheckedChanged);
                 cb.Parent = controlPanel;
+                
                 checkBoxes.Add(cb);
                 Series series = new Series(c.name);
+                series.ChartType = SeriesChartType.FastLine;
                 seriesList.Add(series);
                 if ( c.yAxes == 2)
                     series.YAxisType = AxisType.Secondary;
@@ -60,7 +65,8 @@ namespace P1monitor
                 
         public void plot(int series, double value)
         {
-            seriesList[series].Points.Add(value);
+            DateTime dt = DateTime.Now;
+            seriesList[series].Points.AddXY(dt.ToShortTimeString(),value);
         }
         public void resize ( int width)
         {
@@ -88,25 +94,20 @@ namespace P1monitor
         new ChartDescr ( "Stroom L3", 2, true),
         };
 
-        private void chart1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ChartControl_AutoSizeChanged(object sender, EventArgs e)
-        {
-            controlPanel.Width = Width;
-        }
-
         public void resize(Size size)
         {
-            controlPanel.Size = size;
-            chart1.Size = size;
-
+            Size = size;
         }
 
-        private void ChartControl_Load_1(object sender, EventArgs e)
+        private void cb_CheckedChanged(object sender, EventArgs e)
         {
+            CheckBox c = (CheckBox) sender;
+            seriesList[(int) c.Tag].Enabled = c.Checked;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
 
         }
     }
