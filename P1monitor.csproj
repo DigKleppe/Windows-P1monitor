@@ -47,6 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="bigTableItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="bigTableItem.Designer.cs">
+      <DependentUpon>bigTableItem.cs</DependentUpon>
+    </Compile>
     <Compile Include="ChartControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -76,6 +82,9 @@
     <Compile Include="TableItem.Designer.cs">
       <DependentUpon>TableItem.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="bigTableItem.resx">
+      <DependentUpon>bigTableItem.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ChartControl.resx">
       <DependentUpon>ChartControl.cs</DependentUpon>
     </EmbeddedResource>

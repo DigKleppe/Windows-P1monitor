@@ -10,11 +10,10 @@ using System.Windows.Forms;
 
 namespace P1monitor
 {
-    public partial class TableItem : UserControl
+    public partial class BigTableItem : UserControl 
     {
-       private const int maxLines = 12;
-        
-        public TableItem( string  text, int idx)
+        private const int maxLines = 12;
+        public BigTableItem(string text, int idx) 
         {
             InitializeComponent();
             if (idx < maxLines)
@@ -29,16 +28,17 @@ namespace P1monitor
             }
             setText(text);
         }
-        public void setText ( string text)
+        public void setText(string text)
         {
             string[] strings = text.Split(new char[] { ';' });
             tablelabel.Text = strings[0] + " :";
             textBox1.Text = strings[1];
         }
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
+        public void setValue ( string value)
         {
-
+            textBox1.Text = value;
         }
+
+
     }
 }

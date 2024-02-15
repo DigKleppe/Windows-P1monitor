@@ -18,8 +18,6 @@ namespace P1monitor
         const int cbYSpacing = 50;
         List<CheckBox> checkBoxes = new List<CheckBox>();
         List <Series> seriesList = new List <Series>();
-                    
-            
         
         public ChartControl()
         {

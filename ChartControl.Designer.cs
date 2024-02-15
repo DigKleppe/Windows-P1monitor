@@ -45,7 +45,7 @@
             this.controlPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.controlPanel.Location = new System.Drawing.Point(3, 671);
             this.controlPanel.Name = "controlPanel";
-            this.controlPanel.Size = new System.Drawing.Size(898, 65);
+            this.controlPanel.Size = new System.Drawing.Size(1585, 65);
             this.controlPanel.TabIndex = 0;
             // 
             // chartPanel
@@ -57,7 +57,7 @@
             this.chartPanel.Controls.Add(this.chart1);
             this.chartPanel.Location = new System.Drawing.Point(4, 10);
             this.chartPanel.Name = "chartPanel";
-            this.chartPanel.Size = new System.Drawing.Size(897, 655);
+            this.chartPanel.Size = new System.Drawing.Size(1584, 655);
             this.chartPanel.TabIndex = 1;
             // 
             // chart1
@@ -77,7 +77,7 @@
             series1.Name = "Series1";
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Time;
             this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(877, 647);
+            this.chart1.Size = new System.Drawing.Size(1564, 647);
             this.chart1.TabIndex = 1;
             this.chart1.Text = "chart1";
             // 
@@ -89,7 +89,7 @@
             this.Controls.Add(this.chartPanel);
             this.Controls.Add(this.controlPanel);
             this.Name = "ChartControl";
-            this.Size = new System.Drawing.Size(923, 767);
+            this.Size = new System.Drawing.Size(1610, 767);
             this.chartPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);

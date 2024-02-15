@@ -20,47 +20,19 @@ namespace P1monitor
         static Parser parser = new Parser();
         Thread readThread;
         static List<string> p1Data = new List<string>();
+        static List<BigTableItem> bigTableItems = new List<BigTableItem>();
+        private static readonly string[]  bigTableItemNames = {
+            "Opgenomen vermogen (W)",
+            "Geleverd vermogen (W)",
+            "Stroom L1 (A)",
+            "Stroom L2 (A)",
+            "Stroom L3 (A)",
+        };
+
         static bool newData = false;
         static List<TableItem> tableItems = new List<TableItem>();   
         ChartControl chartControl1 = new ChartControl();
-       // TabPage tabPageChart = new TabPage();
-
-       
-       
-
-        // create a series for each line
-        Series series1 = new Series("Group A");
-        Series series2 = new Series("Group B");
-
-        double[] ys1;
-        double[] ys2;
-        double[] ys3;
-        double[] ys4;
-        private double x1Value = 1;
-        private int x2Value = 1;
-
-        private void buildChart ()
-        {
-           // series1.Points.DataBindY( ys1);
-            series1.ChartType = SeriesChartType.FastLine;
-
-            //  series2.Points.DataBindY(ys2);
-            series2.ChartType = SeriesChartType.FastLine;
-
-            // add each series to the chart
-            chart1.Series.Clear();
-            chart1.Series.Add(series1);
-            chart1.Series.Add(series2);
-
-            // additional styling
-            chart1.ResetAutoValues();
-            chart1.Titles.Clear();
-            chart1.Titles.Add($"Column Chart");
-            chart1.ChartAreas[0].AxisX.Title = "Horizontal Axis Label";
-            chart1.ChartAreas[0].AxisY.Title = "Vertical Axis Label";
-            chart1.ChartAreas[0].AxisY.MajorGrid.LineColor = Color.LightGray;
-            chart1.ChartAreas[0].AxisX.MajorGrid.LineColor = Color.LightGray;
-        }
+                
 
         public MainForm()
         {
@@ -75,29 +47,18 @@ namespace P1monitor
                 poortToolStripMenuItem_Click(null, null);
             }
             toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
-            buildChart();
+           
             MainForm_ResizeEnd(null, null); // resize chart
-
-         //   chartControl1.Parent = panel1;
             tabPage3.Controls.Add(chartControl1);
-
-         //   tabControl1.Controls.Add(tabPageChart);
-            
-
-        }
-        private void plot ( int series , double value)
-        {   DateTime dateTime = DateTime.Now;
-            
-            switch (series)
+            int n = 0;
+            foreach (string str in bigTableItemNames)  
             {
-                case 0:
-                    series1.Points.AddXY(dateTime.ToShortTimeString(), value);
-                    break;
-                case 1:
-                    series2.Points.AddXY(x2Value++, value);
-                    break;
+                BigTableItem bigTableItem = new BigTableItem(str + "; -- ", n++);
+                bigTableItem.Parent = bigTablePanel;
+                bigTableItems.Add(bigTableItem);
             }
         }
+
         public bool OpenSerialPort(string port)
         {
             try {
@@ -165,10 +126,6 @@ namespace P1monitor
         //    readThread.Join();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-
-        }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -192,13 +149,17 @@ namespace P1monitor
                 exportTable(p1Data);
                
                 log_t lastLogValue = parser.getlastLogValue();
-                plot(0, lastLogValue.power);
                 chartControl1.plot(0, lastLogValue.power);
                 chartControl1.plot(1, lastLogValue.deliveredPower);
                 chartControl1.plot(2, lastLogValue.currentL1);
                 chartControl1.plot(3, lastLogValue.currentL2);
                 chartControl1.plot(4, lastLogValue.currentL3);
-
+               
+                bigTableItems[0].setValue(lastLogValue.power.ToString("0"));
+                bigTableItems[1].setValue(lastLogValue.deliveredPower.ToString("0"));
+                bigTableItems[2].setValue(lastLogValue.currentL1.ToString("0.0"));
+                bigTableItems[3].setValue(lastLogValue.currentL2.ToString("0.0"));
+                bigTableItems[3].setValue(lastLogValue.currentL3.ToString("0.0"));
 
                 if (p1Data != null)
                 {
@@ -220,9 +181,7 @@ namespace P1monitor
                 {
                     TableItem tableItem = new TableItem(str, item++);
                     tableItem.Parent = tablePanel1;
-            //        tableItem.setyPos(item);
                     tableItems.Add(tableItem);
-                    
                 }
             }
             else
