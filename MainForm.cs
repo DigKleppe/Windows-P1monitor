@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.IO.Ports;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,8 +17,11 @@ namespace P1monitor
 {
     public partial class MainForm : Form
     {
+
+        private static readonly bool simulate = false;
         static SerialPort serialPort;
         static Parser parser = new Parser();
+        
         Thread readThread;
         static List<string> p1Data = new List<string>();
         static List<BigTableItem> bigTableItems = new List<BigTableItem>();
@@ -28,11 +32,12 @@ namespace P1monitor
             "Stroom L2 (A)",
             "Stroom L3 (A)",
         };
-
+        private static int lastHourTimeStamp = 0;
         static bool newData = false;
         static List<TableItem> tableItems = new List<TableItem>();   
-        ChartControl chartControl1 = new ChartControl();
-                
+        ChartControl hourChartControl = new ChartControl(3600); // 1 hour at 1 sec interval
+        ChartControl dayChartControl = new ChartControl(60*24);// 1 day at 1 min interval
+        simulation simulation = new simulation();
 
         public MainForm()
         {
@@ -42,21 +47,28 @@ namespace P1monitor
             Top = Properties.Settings.Default.FormTop;
             Left = Properties.Settings.Default.FormLeft;
             Parser parser = new Parser();
-            if (OpenSerialPort(Properties.Settings.Default.Comport) == false)
-            {
-                poortToolStripMenuItem_Click(null, null);
-            }
-            toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
-           
-            MainForm_ResizeEnd(null, null); // resize chart
-            tabPage3.Controls.Add(chartControl1);
+            tabPage3.Controls.Add(hourChartControl);
+            tabPage4.Controls.Add(dayChartControl);
             int n = 0;
-            foreach (string str in bigTableItemNames)  
+            foreach (string str in bigTableItemNames)
             {
                 BigTableItem bigTableItem = new BigTableItem(str + "; -- ", n++);
                 bigTableItem.Parent = bigTablePanel;
                 bigTableItems.Add(bigTableItem);
             }
+            if (!simulate)
+            {
+                if (OpenSerialPort(Properties.Settings.Default.Comport) == false)
+                {
+                    poortToolStripMenuItem_Click(null, null);
+                }
+                toolStripStatusLabel1.Text = "Serieele poort: " + Properties.Settings.Default.Comport;
+            }
+            else
+                toolStripStatusLabel1.Text = "Simulatie";
+
+            MainForm_ResizeEnd(null, null); // resize chart
+          
         }
 
         public bool OpenSerialPort(string port)
@@ -94,7 +106,7 @@ namespace P1monitor
                    List<string> list = new List<string>();
                    string message = serialPort.ReadLine();
                   //  Console.WriteLine(message);
-                   list = parser.parseP1data(message);
+                   list = parser.ParseP1data(message);
                    if (list != null)
                    {
                         p1Data = list;
@@ -111,6 +123,7 @@ namespace P1monitor
             if (f.ShowDialog() == DialogResult.OK)
             {
                 Properties.Settings.Default.Comport = f.getPort();
+                OpenSerialPort(Properties.Settings.Default.Comport);
             }
             f.Dispose();
         }
@@ -129,12 +142,25 @@ namespace P1monitor
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            try
+           try
            {
                 List<string> list = new List<string>();
-                string message = serialPort.ReadLine();
-                //  Console.WriteLine(message);
-                list = parser.parseP1data(message);
+
+                if (simulate)
+                {
+                    string[] items = simulation._3PhaseSimData[0].Split(new char[] { '\n' });
+
+                    foreach (string s in items) {
+
+                        list = parser.ParseP1data(s);
+                    }
+                }
+                else
+                {
+                    string message = serialPort.ReadLine();
+                    //  Console.WriteLine(message);
+                    list = parser.ParseP1data(message);
+                }
                 if (list != null)
                 {
                     p1Data = list;
@@ -147,20 +173,30 @@ namespace P1monitor
            if ( newData)
             {
                 exportTable(p1Data);
-               
-                log_t lastLogValue = parser.getlastLogValue();
-                chartControl1.plot(0, lastLogValue.power);
-                chartControl1.plot(1, lastLogValue.deliveredPower);
-                chartControl1.plot(2, lastLogValue.currentL1);
-                chartControl1.plot(3, lastLogValue.currentL2);
-                chartControl1.plot(4, lastLogValue.currentL3);
-               
+                          
+                log_t lastLogValue = parser.GetlastLogValue();
+                hourChartControl.plot(0, lastLogValue.power);
+                hourChartControl.plot(1, lastLogValue.deliveredPower);
+                hourChartControl.plot(2, lastLogValue.currentL1);
+                hourChartControl.plot(3, lastLogValue.currentL2);
+                hourChartControl.plot(4, lastLogValue.currentL3);
+
                 bigTableItems[0].setValue(lastLogValue.power.ToString("0"));
                 bigTableItems[1].setValue(lastLogValue.deliveredPower.ToString("0"));
                 bigTableItems[2].setValue(lastLogValue.currentL1.ToString("0.0"));
                 bigTableItems[3].setValue(lastLogValue.currentL2.ToString("0.0"));
-                bigTableItems[3].setValue(lastLogValue.currentL3.ToString("0.0"));
+                bigTableItems[4].setValue(lastLogValue.currentL3.ToString("0.0"));
 
+                lastLogValue = parser.GetlastHourLogValue();
+                if (lastLogValue.timeStamp != lastHourTimeStamp)
+                {   dayChartControl.plot(0, lastLogValue.power);
+                    dayChartControl.plot(1, lastLogValue.deliveredPower);
+                    dayChartControl.plot(2, lastLogValue.currentL1);
+                    dayChartControl.plot(3, lastLogValue.currentL2);
+                    dayChartControl.plot(4, lastLogValue.currentL3);
+                    lastHourTimeStamp = lastLogValue.timeStamp;
+                }
+               
                 if (p1Data != null)
                 {
                     foreach (string str in p1Data)
@@ -201,7 +237,7 @@ namespace P1monitor
         private void MainForm_ResizeEnd(object sender, EventArgs e)
         {
            Size size = new Size(tabControl1.Width, tabControl1.Height);
-           chartControl1.resize(size);
+           hourChartControl.resize(size);
         }
     }
 }

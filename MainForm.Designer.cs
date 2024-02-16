@@ -37,11 +37,12 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.bigTablePanel = new System.Windows.Forms.Panel();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tablePanel1 = new System.Windows.Forms.Panel();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.bigTablePanel = new System.Windows.Forms.Panel();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
             this.menuStrip1.SuspendLayout();
             this.statusStrip2.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -100,6 +101,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(0, 27);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -115,7 +117,7 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(1709, 779);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Grafiek";
+            this.tabPage1.Text = "Beginscherm";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // splitContainer1
@@ -140,6 +142,16 @@
             this.splitContainer1.SplitterDistance = 568;
             this.splitContainer1.TabIndex = 5;
             // 
+            // bigTablePanel
+            // 
+            this.bigTablePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.bigTablePanel.Location = new System.Drawing.Point(206, 185);
+            this.bigTablePanel.Name = "bigTablePanel";
+            this.bigTablePanel.Size = new System.Drawing.Size(1698, 378);
+            this.bigTablePanel.TabIndex = 0;
+            // 
             // textBox1
             // 
             this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -161,7 +173,7 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(1709, 779);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabel";
+            this.tabPage2.Text = "Tabel";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // tablePanel1
@@ -180,20 +192,19 @@
             // 
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(1308, 779);
+            this.tabPage3.Size = new System.Drawing.Size(1709, 779);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "dag gegevens";
+            this.tabPage3.Text = "Uur gegevens";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // bigTablePanel
+            // tabPage4
             // 
-            this.bigTablePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.bigTablePanel.Location = new System.Drawing.Point(206, 185);
-            this.bigTablePanel.Name = "bigTablePanel";
-            this.bigTablePanel.Size = new System.Drawing.Size(1698, 378);
-            this.bigTablePanel.TabIndex = 0;
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(1709, 779);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Dag gegevens";
+            this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -241,6 +252,7 @@
         private System.Windows.Forms.Panel tablePanel1;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Panel bigTablePanel;
+        private System.Windows.Forms.TabPage tabPage4;
     }
 }
 

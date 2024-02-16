@@ -20,7 +20,7 @@ namespace P1monitor
     public class Log
     {
         public enum LogType { HOURLOG, DAYLOG };
-        private const int LOGINTERVAL = 60 * 5;
+        private const int LOGINTERVAL = 6;  // 10 seconds , old meter
         private const int MAXDAYLOGVALUES = (24 * 60 * 60) / LOGINTERVAL;
         private const int MAXHOURLOGVALUES = 3600;
 
@@ -29,6 +29,7 @@ namespace P1monitor
         private int timeStamp = 0;
         private int logPrescaler = LOGINTERVAL;
         public string logFileName = "log.csv";
+        public log_t lastHourLog = new log_t();
 
         log_t accumulator;
 
@@ -70,6 +71,7 @@ namespace P1monitor
                 if (dayLog.Count == MAXDAYLOGVALUES)
                     dayLog.RemoveAt(0);
                 dayLog.Add(logValue);
+                lastHourLog = logValue;
             }
             if (hourLog.Count == MAXHOURLOGVALUES)
                 hourLog.RemoveAt(0);

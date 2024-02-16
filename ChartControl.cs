@@ -15,15 +15,18 @@ namespace P1monitor
     {
 
         const int cbWidth = 150;
-        const int cbYSpacing = 50;
+        private int maxPoints = 10;
         List<CheckBox> checkBoxes = new List<CheckBox>();
         List <Series> seriesList = new List <Series>();
         
-        public ChartControl()
+        public ChartControl(int _maxPoints)
         {
             InitializeComponent();
             init(chartDescrs);
+            maxPoints = _maxPoints;
         }
+
+
 
         private void ChartControl_Load(object sender, EventArgs e)
         {
@@ -34,10 +37,23 @@ namespace P1monitor
             BorderStyle = BorderStyle.FixedSingle;
         }
 
+        private void chart1_GetToolTipText(object sender, ToolTipEventArgs e)
+        {
+            // Check selected chart element and set tooltip text for it
+            switch (e.HitTestResult.ChartElementType)
+            {
+                case ChartElementType.DataPoint:
+                    var dataPoint = e.HitTestResult.Series.Points[e.HitTestResult.PointIndex];
+                    e.Text = string.Format("X:\t{0}\nY:\t{1}", dataPoint.XValue, dataPoint.YValues[0]);
+                    break;
+            }
+        }
+
         void init(ChartDescr[] chartDescrs)
         {
-            int cbXpos = 0;
+            int cbXpos = 0;  
             int index = 0;
+     //       this.chart1.GetToolTipText += this.chart1_GetToolTipText;
             foreach (ChartDescr c in chartDescrs)
             {
                 CheckBox cb = new CheckBox();
@@ -65,6 +81,9 @@ namespace P1monitor
         {
             DateTime dt = DateTime.Now;
             seriesList[series].Points.AddXY(dt.ToShortTimeString(),value);
+            if (seriesList[series].Points.Count > maxPoints) {
+                seriesList[series].Points.RemoveAt(0);
+            }
         }
         public void resize ( int width)
         {

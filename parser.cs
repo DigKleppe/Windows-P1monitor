@@ -105,7 +105,7 @@ namespace P1monitor
 
         // splits (000001.552*kWh)  into strings[] "1.552" and "kwh"
 
-        string[] parseValue ( String valuestr) // (000525.570*kWh)
+        string[] ParseValue ( String valuestr) // (000525.570*kWh)
         {
             string[] val =  valuestr.Split(new char[] { '*' });
             val[0] = val[0].TrimStart('0'); // skip leading zeros from value 
@@ -128,12 +128,17 @@ namespace P1monitor
         //}
         //// reads p1Buffer, searches for IDs , if found add corresponding name and value to p1OutData;
 
-        public log_t getlastLogValue()
+        public log_t GetlastLogValue()
         {
             return lastLogValue;
         }
 
-        public List <string> parseP1data(string p1Buffer)
+        public log_t GetlastHourLogValue()
+        {
+            return log.lastHourLog;
+        }
+
+        public List <string> ParseP1data(string p1Buffer)
         {
             float f;
             log_t logValue = new log_t();
@@ -182,7 +187,7 @@ namespace P1monitor
                             if (items.Length > 1)
                             {
                                 outLine = pVar.name + ";";
-                                valuestr = parseValue(items[1]);
+                                valuestr = ParseValue(items[1]);
                                 switch (pVar.function)
                                 {
                                     case 0:
@@ -225,9 +230,6 @@ namespace P1monitor
                                         break;
 
                                 }
-                                
-                                  
-                                
                                 p1OutBuffer.Add(outLine);
                             }
                         }
