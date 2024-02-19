@@ -157,14 +157,16 @@ namespace P1monitor
                 }
                 else
                 {
-                    string message = serialPort.ReadLine();
-                    //  Console.WriteLine(message);
-                    list = parser.ParseP1data(message);
-                }
-                if (list != null)
-                {
-                    p1Data = list;
-                    newData = true;
+                    while ( !newData && serialPort.BytesToRead > 0 ) { 
+                        string message = serialPort.ReadLine();
+                        //  Console.WriteLine(message);
+                        list = parser.ParseP1data(message);
+                        if (list != null)
+                        {
+                            p1Data = list;
+                            newData = true;
+                        }
+                    }
                 }
            }
            catch {             
